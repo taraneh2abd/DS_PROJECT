@@ -31,7 +31,7 @@ def dataset_format_converter(CONTENT_FILE_PATTERN, CONTENT_DIR):
         unique_tokens_in_all |= tokens
 
         data_list.append({'Filename': filename, 'unique Tokens of document': tokens, 'Content': content,
-                        'sentences': sentences, 'count_dict': count_dict(sentences, tokens)})
+                        'sentences': sentences, 'count_dict': count_dict(sentences, tokens), 'vectors': [],'tf-idf': []})
         index += 1
 
     df = pd.DataFrame(data_list)
