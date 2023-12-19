@@ -11,7 +11,7 @@ def remove_punctuation(text):
     cleaned_text = re.sub(r'[^\w\s]', '', text)
     return cleaned_text
 
-def tokenizeer(sentence):
+def tokenizer(sentence):
     lemmatizer = WordNetLemmatizer()
 
     stopwords = set(stopwords.words("english"))
