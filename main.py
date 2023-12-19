@@ -17,3 +17,10 @@ word_map = {}
 for i, word in enumerate(unique_tokens_in_all):
     word_map[word] = i
 df = calculate_tfidf(df, unique_tokens_in_all, word_map)
+
+for case in query:
+    print("*" * 45)
+    print(f"Searching in document No: {case['document_id']}")
+    
+
+    
