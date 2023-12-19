@@ -10,4 +10,5 @@ CONTENT_DIR = path("dataset/data")
 
 query = json.loads(open(JSON_FILE, encoding="UTF8").read())
 
-data_list , unique_tokens_in_all = dataset_format_converter(CONTENT_FILE_PATTERN, CONTENT_DIR)
+df , unique_tokens_in_all = dataset_format_converter(CONTENT_FILE_PATTERN, CONTENT_DIR)
+

@@ -25,5 +25,6 @@ def dataset_format_converter(CONTENT_FILE_PATTERN, CONTENT_DIR):
                         'unique Tokens of sentence': sentences})
         index += 1
 
+    df = pd.DataFrame(data_list)
 
-    return data_list , unique_tokens_in_all 
+    return df , unique_tokens_in_all 
