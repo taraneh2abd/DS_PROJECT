@@ -3,6 +3,15 @@ from pathlib import path
 import pandas as pd
 from word_tokenizer import tokenizer 
 
+def count_dict(sentences, word_set):
+    count_dict = {}
+    for word in word_set:
+        count_dict[word] = 0
+    for sent in sentences:
+        for word in sent:
+            count_dict[word] += 1
+    return count_dict
+
 def dataset_format_converter(CONTENT_FILE_PATTERN, CONTENT_DIR):
     data_list = []
     unique_tokens_in_all = set()
@@ -15,14 +24,14 @@ def dataset_format_converter(CONTENT_FILE_PATTERN, CONTENT_DIR):
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
             for line in file:
-                sentences.append(set(tokenizer(line.strip())))
-
-        tokens = tokenizer(content)
-
-        unique_tokens_in_all |= set(tokens) 
+                sentences.append(tokenizer(line.strip()))
+        
+        tokens = set(tokenizer(content))
+        
+        unique_tokens_in_all |= tokens
 
         data_list.append({'Filename': filename, 'unique Tokens of document': tokens, 'Content': content,
-                        'unique Tokens of sentence': sentences})
+                        'sentences': sentences, 'count_dict': count_dict(sentences, tokens)})
         index += 1
 
     df = pd.DataFrame(data_list)
