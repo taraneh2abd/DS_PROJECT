@@ -45,7 +45,7 @@ def search(sentence, conditates, df, unique_tokens, word_map):
             max = target[i]
 
 
-    return res, v
+    return res, max_inx
 
     
 
