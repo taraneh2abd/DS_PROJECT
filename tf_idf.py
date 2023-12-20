@@ -28,6 +28,9 @@ def calculate_tfidf(df, unique_tokens, word_map):
             v = tf_idf(sent, unique_tokens, word_map, row)
             vectors.append(v)
             vector += v
+        for i in vector:
+            if i :
+                print(i)
         row['vectors'] = vectors
         row['tf-idf'] = vector
     return df

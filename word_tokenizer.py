@@ -17,7 +17,6 @@ def remove_punctuation(text):
 
 def tokenizer(sentence):
     lemmatizer = WordNetLemmatizer()
-    lemmatizer = WordNetLemmatizer()
     sentence = remove_punctuation(sentence)
     tokens = word_tokenize(sentence.lower())  
     tokens = set(lemmatizer.lemmatize(token) for token in tokens if token not in stopwords)
