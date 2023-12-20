@@ -1,6 +1,6 @@
 from word_tokenizer import tokenizer 
 from dataset_generator import count_dict
-from tf_idf import tfidf
+from tf_idf import tf_idf
 from cosine_similarity import cosine_similarity
 from difflib import SequenceMatcher
 
@@ -25,27 +25,30 @@ def search(sentence, conditates, df, unique_tokens, word_map):
     tokens = similar_tokens(sentence, unique_tokens)
 
     data = {'sentences': tokens, 'count_dict': count_dict(tokens, tokens),'tf-idf': []}
-    data['tf-idf'] = tfidf(tokens, unique_tokens, word_map, data)
+    data['tf-idf'] = tf_idf(tokens, unique_tokens, word_map, data)
 
     for condidate in conditates:
-        res[condidate] = cosine_similarity(data['tf-idf'],df[df['Filename'] == CONTENT_FILE_PATTERN.format(index=condidate)])
+        res[condidate] = cosine_similarity(data['tf-idf'],df.iloc[condidate, df.columns.get_loc('tf-idf')])
+        print(res[condidate])
     res = dict(sorted(res.items(), key=lambda item: item[1], reverse=True))
 
-    ans = res[0][0]
+
+
+    ans = next(iter(res)) 
 
     target = []
-    for v in df[df['Filename'] == CONTENT_FILE_PATTERN.format(index=ans)]['vectors']:
+    for v in df.iloc[condidate, df.columns.get_loc('vectors')]:
         target.append(cosine_similarity(data['tf-idf'],v))
 
-    max = 0
-    max_inx
+    max_val = 0
+    max_inx = 0
     for i in range(len(target)):
-        if max < target[i]:
+        if max_val < target[i]:
             max_inx = i
-            max = target[i]
+            max_val = target[i]
 
 
-    return res, max_inx
+    return ans, max_inx, max_val
 
     
 

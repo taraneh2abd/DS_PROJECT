@@ -1,5 +1,5 @@
 import json
-from pathlib import path
+from pathlib import Path
 import pandas as pd
 from word_tokenizer import tokenizer 
 
@@ -16,7 +16,7 @@ def dataset_format_converter(CONTENT_FILE_PATTERN, CONTENT_DIR):
     data_list = []
     unique_tokens_in_all = set()
     index = 0
-    while path.isfile(CONTENT_FILE_PATTERN.format(index = index)):
+    while Path(CONTENT_DIR /CONTENT_FILE_PATTERN.format(index = index)).is_file():
         sentences = []
         filename = CONTENT_FILE_PATTERN.format(index = index)
         file_path = CONTENT_DIR / CONTENT_FILE_PATTERN.format(index=index)
@@ -31,7 +31,7 @@ def dataset_format_converter(CONTENT_FILE_PATTERN, CONTENT_DIR):
         unique_tokens_in_all |= tokens
 
         data_list.append({'Filename': filename, 'unique Tokens of document': tokens, 'Content': content,
-                        'sentences': sentences, 'count_dict': count_dict(sentences, tokens), 'vectors': [],'tf-idf': []})
+                        'sentences': sentences, 'count_dict': count_dict(sentences, tokens), 'vectors': None,'tf-idf': None})
         index += 1
 
     df = pd.DataFrame(data_list)

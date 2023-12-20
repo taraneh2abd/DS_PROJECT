@@ -3,8 +3,12 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
+
 nltk.download('stopwords')
 nltk.download('punkt')
+nltk.download('wordnet')
+
+
 stopwords = set(stopwords.words("english"))
 
 def remove_punctuation(text):
@@ -13,8 +17,6 @@ def remove_punctuation(text):
 
 def tokenizer(sentence):
     lemmatizer = WordNetLemmatizer()
-
-    stopwords = set(stopwords.words("english"))
     lemmatizer = WordNetLemmatizer()
     sentence = remove_punctuation(sentence)
     tokens = word_tokenize(sentence.lower())  

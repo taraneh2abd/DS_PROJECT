@@ -1,3 +1,4 @@
 env
 env/
 dataset/
+__pycache__/
