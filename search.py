@@ -3,6 +3,8 @@ from dataset_generator import count_dict
 from tf_idf import tf_idf
 from cosine_similarity import cosine_similarity
 from difflib import SequenceMatcher
+from tf_idf import calculate_tfidf
+from termcolor import colored
 
 CONTENT_FILE_PATTERN = "document_{index}.txt"
 
@@ -27,14 +29,19 @@ def search(sentence, conditates, df, unique_tokens, word_map):
     data = {'sentences': tokens, 'count_dict': count_dict(tokens, tokens),'tf-idf': []}
     data['tf-idf'] = tf_idf(tokens, unique_tokens, word_map, data)
 
+    print(colored("!!!Calculating tf_idf of documents!!!", "red"))
+    df = calculate_tfidf(df, unique_tokens, word_map, conditates)
+    
     for condidate in conditates:
+        print(df.iloc[condidate, df.columns.get_loc('tf-idf')])
         res[condidate] = cosine_similarity(data['tf-idf'],df.iloc[condidate, df.columns.get_loc('tf-idf')])
     res = dict(sorted(res.items(), key=lambda item: item[1], reverse=True))
 
     ans = next(iter(res)) 
     print(f"ans = {ans}")
     target = []
-    for v in df.iloc[condidate, df.columns.get_loc('vectors')]:
+
+    for v in df.iloc[ans, df.columns.get_loc('vectors')]:
         target.append(cosine_similarity(data['tf-idf'],v))
     
 

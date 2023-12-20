@@ -12,7 +12,5 @@ def cosine_similarity(v1,v2):
         sumxx += x*x
         sumyy += y*y
         sumxy += x*y
-        if sumxx or  sumxy or sumyy:
-            print (sumxx, sumxy, sumyy)
             
     return sumxy/math.sqrt(sumxx*sumyy)

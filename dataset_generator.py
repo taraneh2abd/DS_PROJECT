@@ -27,7 +27,7 @@ def dataset_format_converter(CONTENT_FILE_PATTERN, CONTENT_DIR):
     index = 0
     
     word_map = {}
-    if not Path(CLEAN_DS_FILE).is_file():
+    if not Path(DS_PATH / CLEAN_DS_FILE).is_file():
         while Path(CONTENT_DIR /CONTENT_FILE_PATTERN.format(index = index)).is_file():
             sentences = []
             tokens = set()
@@ -50,20 +50,18 @@ def dataset_format_converter(CONTENT_FILE_PATTERN, CONTENT_DIR):
 
         df = pd.DataFrame(data_list)
 
-        print(colored("!!!Calculating tf_idf of documents!!!", "red"))
-        df = calculate_tfidf(df, unique_tokens, word_map)
         df.to_csv(Path(DS_PATH / CLEAN_DS_FILE))
         print(colored(f"Clean data seved to dataset/clean_data.csv", "yellow"))
 
 
     else:
         df = pd.read_csv(Path(DS_PATH / CLEAN_DS_FILE))
-        with open(Path(DS_PATH / UNIQUE_TOKENS_FILE),'rb') as f:
-             unique_tokens = pickle.load(f)
+
+        for index, row in df.iterrows():
+            unique_tokens |= set(row['unique Tokens of document'])
         
         for i, word in enumerate(unique_tokens):
             word_map[word] = i
         
         print(colored(f"Clean data loaded from dataset/clean_data.csv", "blue"))
-        print(colored(f"Unique tokens loaded from dataset/unique_tokens.txt", "blue"))
     return df , unique_tokens , word_map

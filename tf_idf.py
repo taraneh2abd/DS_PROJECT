@@ -20,15 +20,18 @@ def tf_idf(sentence, word_set, word_map, doc):
         vec[word_map[word]] = term_freq * idf_val
     return vec
 
-def calculate_tfidf(df, unique_tokens, word_map):
-    for index, row in df.iterrows():
+def calculate_tfidf(df, unique_tokens, word_map, canditates):
+    
+    for candidate in canditates:
         vector = np.zeros(len(unique_tokens))
         vectors = [] 
+        row = df.loc[canditates]
         for sent in row['sentences']:
             v = tf_idf(sent, unique_tokens, word_map, row)
             vectors.append(v)
             vector += v
             
-        row['vectors'] = vectors
-        row['tf-idf'] = vector
+        df.iloc[candidate, df.columns.get_loc('tf-idf')] = vector
+        df.iloc[candidate, df.columns.get_loc('vectors')] = vectors
+    
     return df
