@@ -5,10 +5,10 @@ from word_tokenizer import tokenizer
 from termcolor import colored
 import pickle
 from tf_idf import calculate_tfidf
-
+from tqdm import tqdm
 
 DS_PATH = Path("dataset")
-CLEAN_DS_FILE = Path("clean_data.csv")
+CLEAN_DS_FILE = Path("clean_data.json")
 UNIQUE_TOKENS_FILE = Path("unique_tokens.txt")
 
 def count_dict(sentences, word_set):
@@ -48,20 +48,27 @@ def dataset_format_converter(CONTENT_FILE_PATTERN, CONTENT_DIR):
         for i, word in enumerate(unique_tokens):
             word_map[word] = i
 
-        df = pd.DataFrame(data_list)
+        data= data_list
 
-        df.to_csv(Path(DS_PATH / CLEAN_DS_FILE))
+        for item in data_list:
+            for key, value in item.items():
+                if isinstance(value, set):
+                    item[key] = list(value)
+        with open(Path(DS_PATH / CLEAN_DS_FILE), 'w') as json_file:
+            json.dump(data_list, json_file, indent=4)
         print(colored(f"Clean data seved to dataset/clean_data.csv", "yellow"))
 
 
     else:
-        df = pd.read_csv(Path(DS_PATH / CLEAN_DS_FILE))
+        data = json.loads(open(Path(DS_PATH / CLEAN_DS_FILE), encoding="UTF8").read())
+        # data["vectors"] = data["vectors"].astype(object)
+        # data["tf-idf"] = data["tf-idf"].astype(object)
 
-        for index, row in df.iterrows():
-            unique_tokens |= set(row['unique Tokens of document'])
-        
+        for document in data:
+            unique_tokens |= set(document['unique Tokens of document'])
+            
         for i, word in enumerate(unique_tokens):
             word_map[word] = i
         
         print(colored(f"Clean data loaded from dataset/clean_data.csv", "blue"))
-    return df , unique_tokens , word_map
+    return data , unique_tokens , word_map

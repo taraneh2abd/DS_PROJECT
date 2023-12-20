@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 
 def term_frequency(doc, word):
     n = len(doc)
@@ -12,26 +13,31 @@ def inverse_document_frequency(word, doc):
         word_occurrence = 1
     return np.log(len(doc['sentences']) / word_occurrence)
 
-def tf_idf(sentence, word_set, word_map, doc):
-    vec = np.zeros((len(word_set)))
+def tf_idf(sentence,word_map, doc):
+    vec = {}
     for word in sentence:
         term_freq = term_frequency(sentence, word)
         idf_val = inverse_document_frequency(word, doc)
         vec[word_map[word]] = term_freq * idf_val
     return vec
 
-def calculate_tfidf(df, unique_tokens, word_map, canditates):
-    
-    for candidate in canditates:
-        vector = np.zeros(len(unique_tokens))
+def calculate_tfidf(df, word_map, candidates):
+    print("Calculating TF-IDF ...")
+    for candidate in candidates:
+        vector = {}
         vectors = [] 
-        row = df.loc[canditates]
+        row = df[candidate]
         for sent in row['sentences']:
-            v = tf_idf(sent, unique_tokens, word_map, row)
+            v = tf_idf(sent, word_map, row)
+
+            for key, value in v.items():
+                if key in vector:
+                    vector[key] += value
+                else:
+                    vector[key] = value
             vectors.append(v)
-            vector += v
             
-        df.iloc[candidate, df.columns.get_loc('tf-idf')] = vector
-        df.iloc[candidate, df.columns.get_loc('vectors')] = vectors
+        df[candidate]['tf-idf'] = vector
+        df[candidate]['vectors'] = vectors
     
     return df

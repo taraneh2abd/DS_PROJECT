@@ -20,28 +20,27 @@ def similar_tokens(query, unique_tokens, threshold=0.8):
     return similar_tokens
 
 
-def search(sentence, conditates, df, unique_tokens, word_map):
+def search(sentence, candidates, df, unique_tokens, word_map):
     res={}
 
-    tokens = tokenizer(sentence)
-    tokens = similar_tokens(sentence, unique_tokens)
+    sent = tokenizer(sentence)
+    tokens = similar_tokens(sent, unique_tokens)
 
-    data = {'sentences': tokens, 'count_dict': count_dict(tokens, tokens),'tf-idf': []}
-    data['tf-idf'] = tf_idf(tokens, unique_tokens, word_map, data)
+    data = {'sentences': tokens, 'count_dict': count_dict(tokens, tokens),'tf-idf': None}
+    data['tf-idf'] = tf_idf(tokens, word_map, data)
 
     print(colored("!!!Calculating tf_idf of documents!!!", "red"))
-    df = calculate_tfidf(df, unique_tokens, word_map, conditates)
+    df = calculate_tfidf(df, word_map, candidates)
     
-    for condidate in conditates:
-        print(df.iloc[condidate, df.columns.get_loc('tf-idf')])
-        res[condidate] = cosine_similarity(data['tf-idf'],df.iloc[condidate, df.columns.get_loc('tf-idf')])
+    for candidate in candidates:
+        res[candidate] = cosine_similarity(data['tf-idf'],df[candidate]['tf-idf'])
     res = dict(sorted(res.items(), key=lambda item: item[1], reverse=True))
 
     ans = next(iter(res)) 
     print(f"ans = {ans}")
     target = []
 
-    for v in df.iloc[ans, df.columns.get_loc('vectors')]:
+    for v in df[ans]['vectors']:
         target.append(cosine_similarity(data['tf-idf'],v))
     
 
