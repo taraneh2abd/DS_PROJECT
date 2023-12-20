@@ -29,16 +29,14 @@ def search(sentence, conditates, df, unique_tokens, word_map):
 
     for condidate in conditates:
         res[condidate] = cosine_similarity(data['tf-idf'],df.iloc[condidate, df.columns.get_loc('tf-idf')])
-        print(res[condidate])
     res = dict(sorted(res.items(), key=lambda item: item[1], reverse=True))
 
-
-
     ans = next(iter(res)) 
-
+    print(f"ans = {ans}")
     target = []
     for v in df.iloc[condidate, df.columns.get_loc('vectors')]:
         target.append(cosine_similarity(data['tf-idf'],v))
+    
 
     max_val = 0
     max_inx = 0
