@@ -19,31 +19,31 @@ class TFIDFVectorizer:
 
             for document in documents:
                 doc_tfidf = []
-                for sentence in document:
+                for sentence in document['sentences']:
                     tf_arr = {}
                     term_frequency = self.calculate_term_frequency(sentence)
                     tfidf_sentence = {term: tf * self.inverse_document_frequency[term] for term, tf in term_frequency.items()}
                     for key, val in tfidf_sentence.items():
                         tf_arr[self.word_map[key]] = val
                     doc_tfidf.append(tf_arr)
-                tfidf_values[document["name"]] = doc_tfidf
+                tfidf_values[document["document_id"]] = doc_tfidf
         
         else:
 
-            for i ,sentence in enumerate(documents):
-                tf_arr = {}
-                term_frequency = self.calculate_term_frequency(sentence)
-                tfidf_sentence = {term: tf * self.inverse_document_frequency[term] for term, tf in term_frequency.items()}
-                for key, val in tfidf_sentence.items():
-                    tf_arr[self.word_map[key]] = val
-                tfidf_values[i] = tf_arr
+           
+            tf_arr = {}
+            term_frequency = self.calculate_term_frequency(documents['sentence'])
+            tfidf_sentence = {term: tf * self.inverse_document_frequency[term] for term, tf in term_frequency.items()}
+            for key, val in tfidf_sentence.items():
+                tf_arr[self.word_map[key]] = val
+            return tf_arr
 
         return tfidf_values
 
-    def fit_transform(self, documents):
+    def fit_transform(self, documents, data_type):
         # Fit and transform in one step
         self.fit(documents)
-        return self.transform(documents)
+        return self.transform(documents, data_type)
 
     def calculate_term_frequency(self, document):
         term_frequency = {}
@@ -51,7 +51,6 @@ class TFIDFVectorizer:
 
         for term in document:
             term_frequency[term] = term_frequency.get(term, 0) + 1 / total_terms
-
         return term_frequency
 
     def calculate_inverse_document_frequency(self, documents):
@@ -59,7 +58,7 @@ class TFIDFVectorizer:
         term_document_count = Counter()
 
         for document in documents:
-            for sent in document:
+            for sent in document['sentences']:
                 unique_terms = set(sent)
                 term_document_count.update(unique_terms)
 

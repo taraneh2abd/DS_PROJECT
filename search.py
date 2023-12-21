@@ -1,41 +1,22 @@
-from word_tokenizer import tokenizer 
-from dataset_generator import count_dict
-from cosine_similarity import cosine_similarity2
-from difflib import SequenceMatcher, get_close_matches
-from tf_idf import calculate_tfidf, calculate_tfidf2
+from cosine_similarity import cosine_similarity
 from termcolor import colored
-import numpy as np
-
-def search(sentence, candidates, df, unique_tokens, word_map):
+from tqdm import tqdm
+from dataset_generator import DatasetGenerator
+def search(qcase, candidates, df,unique_tokens ):
     res={}
 
-    sent = tokenizer(sentence)
-    tokens = similar_tokens(sent, unique_tokens)
-    data = {'sentences': tokens, 'count_dict': count_dict(tokens, tokens),'tf-idf': None}
     # data['tf-idf'] = tf_idf(tokens, word_map, data)
     # print(tokens)
     # print(sent)
-    print(colored("!!!Calculating tf_idf of documents!!!", "red"))
-    df = calculate_tfidf(df, word_map, candidates)
-
-    tf_arr = []
-    tf_arr.append([tokens])
-    n =1
-    for i in candidates:
-        tf_arr.append(df[i]['sentences'])
-        n += len(df[i]['sentences'])
-
-    tf_arr = calculate_tfidf2(tf_arr, word_map, n)
-    data['tf-idf'] = tf_arr[0][0]
-    
-    doc_tfidf = []
-    for i in tf_arr[1:]:
-        sumd = {}
-        for j in i:
-            sumd = sum_dicts([sumd, j])
-        doc_tfidf.append(sumd)
+    print(colored("!!!Calculating tf_idf of query!!!", "red"))
+    dataset_gerator = DatasetGenerator()
+    qcase['sentence'] = dataset_gerator.similar_tokens(qcase, unique_tokens)
+    qcase = dataset_gerator.calculate_tfidf2(qcase, df, unique_tokens)
+    print(qcase['sentence'])
+    print(qcase['tf_idf'])
+    print(df[0]['tf_idf'])
     for i, candidate in enumerate(candidates):
-        res[candidate] = cosine_similarity2(data['tf-idf'],doc_tfidf[i], len(unique_tokens))
+        res[candidate] = cosine_similarity(qcase['tf_idf'],df[candidate]['tf_idf'])
     res = dict(sorted(res.items(), key=lambda item: item[1], reverse=True))
 
     ans = next(iter(res)) 
@@ -52,8 +33,8 @@ def search(sentence, candidates, df, unique_tokens, word_map):
 
     # tf_arr = calculate_tfidf2(tf_arr, word_map)
     # data['tf-idf'] =  tf_arr[0]
-    for v in tf_arr[candidates.index(ans)]:
-        target.append(cosine_similarity2(data['tf-idf'],v, len(unique_tokens)))
+    for v in tqdm(df[ans]['vectors']):
+        target.append(cosine_similarity(qcase['tf_idf'],v))
     
 
     max_val_sent = 0

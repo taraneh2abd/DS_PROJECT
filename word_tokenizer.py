@@ -14,6 +14,7 @@ class WordTokenizer:
         self.remove_punct = remove_punct
         self.lemmatize = lemm
         self._remove_stopwords = _stopwords
+        
 
     def remove_punctuation(self, text):
         text = re.sub(r'\d+', '', text)
@@ -25,11 +26,11 @@ class WordTokenizer:
             sentence = self.remove_punctuation(sentence)
         tokens = word_tokenize(sentence.lower()) 
 
-        if self._stopwords:
+        if self._remove_stopwords:
             tokens =self.remove_stopwords(tokens)  
 
         if self.lemmatize :
-            tokens = self.lemmatize(self, tokens)
+            tokens = self.lemmatizer(tokens)
 
         return tokens
     
@@ -37,9 +38,8 @@ class WordTokenizer:
 
         return list(token for token in tokens if token not in self.stopwords and len(token) > 2)
     
-    def lemmatize(self, tokens):
+    def lemmatizer(self, tokens):
         
-         lemmatizer = WordNetLemmatizer()
-         tokens = list(lemmatizer.lemmatize(token) for token in tokens)
-
-
+        lemmatizer = WordNetLemmatizer()
+        tokens = list(lemmatizer.lemmatize(token) for token in tokens)
+        return tokens
