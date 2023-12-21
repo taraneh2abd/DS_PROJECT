@@ -2,7 +2,7 @@ from cosine_similarity import cosine_similarity
 from termcolor import colored
 from tqdm import tqdm
 from dataset_generator import DatasetGenerator
-def search(qcase, candidates, df,unique_tokens ):
+def search(qcase, candidates, df,unique_tokens, word_map ):
     res={}
 
     # data['tf-idf'] = tf_idf(tokens, word_map, data)
@@ -11,10 +11,8 @@ def search(qcase, candidates, df,unique_tokens ):
     print(colored("!!!Calculating tf_idf of query!!!", "red"))
     dataset_gerator = DatasetGenerator()
     qcase['sentence'] = dataset_gerator.similar_tokens(qcase, unique_tokens)
-    qcase = dataset_gerator.calculate_tfidf2(qcase, df, unique_tokens)
-    print(qcase['sentence'])
-    print(qcase['tf_idf'])
-    print(df[0]['tf_idf'])
+    qcase = dataset_gerator.calculate_tfidf2(qcase, df, word_map)
+
     for i, candidate in enumerate(candidates):
         res[candidate] = cosine_similarity(qcase['tf_idf'],df[candidate]['tf_idf'])
     res = dict(sorted(res.items(), key=lambda item: item[1], reverse=True))

@@ -56,7 +56,7 @@ class DatasetGenerator:
         query = []
         unique_tokens = set()
         index = 0
-        
+        tokenizer =  WordTokenizer()
         word_map = {}
         if not Path(self.DS_PATH / self.CLEAN_DS_FILE).is_file():
             
@@ -67,7 +67,7 @@ class DatasetGenerator:
 
                 with open(file_path, 'r', encoding='utf-8') as file:
                     for line in file:
-                        sent = self.tokenizer.tokenizer(line.strip())
+                        sent = tokenizer.tokenizer(line.strip())
                         sentences.append(sent)
                         tokens |= set(sent)
                 
@@ -91,20 +91,17 @@ class DatasetGenerator:
                               "candidate_documents_id": case['candidate_documents_id'], "is_selected": case['is_selected']})
             
             for index, case in enumerate(query):
-                query_data[index]['sentence'] = self.tokenizer.tokenizer(case['sentence'])
-            
-            # query = self.similar_tokens(query, unique_tokens)
+                query[index]['sentence'] = tokenizer.tokenizer(case['sentence'])
 
             data = self.calculate_tfidf(data_list)
 
             message2 = self.save_json(data, "data")
             print(colored(message2, "yellow"))
 
-            message1 = self.save_json(query_data, "query")
+            message1 = self.save_json(query, "query")
             print(colored(message1, "yellow"))
 
-            return data, query
-
+            return data, query, unique_tokens, word_map
         else:
             data, message = self.load_json(Path(self.DS_PATH / self.CLEAN_DS_FILE), "dataset.json")
 
@@ -119,7 +116,7 @@ class DatasetGenerator:
 
             query_data, message1 = self.load_json(Path(self.DS_PATH/self.CLEAN_QUERY), "clean_query.json")
 
-            return data, query_data, unique_tokens
+            return data, query_data, unique_tokens, word_map
 
         
     
@@ -133,16 +130,11 @@ class DatasetGenerator:
                 sum_vec = self.sum_dicts([sum_vec, sentence])
             data[key]['tf_idf'] = sum_vec
         
-        # tfidf_query = tfidf_vectorizer.transform(query_data)
-        
+        return data
+            
 
-        # for i, doc_vectors in tqdm(enumerate(tfidf_query)):
-        #     query_data[i]['tf_idf'] = doc_vectors
+    def calculate_tfidf2(self, query_data, df,word_map):
 
-    def calculate_tfidf2(self, query_data, df, unique_tokens):
-        word_map ={}
-        for i, word in enumerate(unique_tokens):
-                word_map[word] = i
         self.tfidf_vectorizer =  TFIDFVectorizer(word_map)
         self.tfidf_vectorizer.fit(df)
         query_data['tf_idf'] = self.tfidf_vectorizer.transform(query_data, 'query')
