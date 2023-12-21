@@ -1,43 +1,71 @@
-import numpy as np
-from tqdm import tqdm
+import math
+from collections import Counter
 
-def term_frequency(doc, word):
-    n = len(doc)
-    occurrence = len([token for token in doc if token == word])
-    return occurrence / n
+class TFIDFVectorizer:
+    def __init__(self, word_map):
+        self.inverse_document_frequency = None
+        self.vocab = None
+        self.word_map = word_map
 
-def inverse_document_frequency(word, doc):
-    try:
-        word_occurrence = doc['count_dict'][word] + 1
-    except KeyError:
-        word_occurrence = 1
-    return np.log(len(doc['sentences']) / word_occurrence)
+    def fit(self, documents):
+        # Compute inverse document frequency and vocabulary
+        self.inverse_document_frequency = self.calculate_inverse_document_frequency(documents)
+        self.vocab = set(self.inverse_document_frequency.keys())
 
-def tf_idf(sentence,word_map, doc):
-    vec = {}
-    for word in sentence:
-        term_freq = term_frequency(sentence, word)
-        idf_val = inverse_document_frequency(word, doc)
-        vec[word_map[word]] = term_freq * idf_val
-    return vec
+    def transform(self, documents, data_type):
+        # Transform documents using the precomputed IDF values
+        tfidf_values = {}
+        if data_type == 'documents':
 
-def calculate_tfidf(df, word_map, candidates):
-    print("Calculating TF-IDF ...")
-    for candidate in candidates:
-        vector = {}
-        vectors = [] 
-        row = df[candidate]
-        for sent in row['sentences']:
-            v = tf_idf(sent, word_map, row)
+            for document in documents:
+                doc_tfidf = []
+                for sentence in document:
+                    tf_arr = {}
+                    term_frequency = self.calculate_term_frequency(sentence)
+                    tfidf_sentence = {term: tf * self.inverse_document_frequency[term] for term, tf in term_frequency.items()}
+                    for key, val in tfidf_sentence.items():
+                        tf_arr[self.word_map[key]] = val
+                    doc_tfidf.append(tf_arr)
+                tfidf_values[document["name"]] = doc_tfidf
+        
+        else:
 
-            for key, value in v.items():
-                if key in vector:
-                    vector[key] += value
-                else:
-                    vector[key] = value
-            vectors.append(v)
-            
-        df[candidate]['tf-idf'] = vector
-        df[candidate]['vectors'] = vectors
-    
-    return df
+            for i ,sentence in enumerate(documents):
+                tf_arr = {}
+                term_frequency = self.calculate_term_frequency(sentence)
+                tfidf_sentence = {term: tf * self.inverse_document_frequency[term] for term, tf in term_frequency.items()}
+                for key, val in tfidf_sentence.items():
+                    tf_arr[self.word_map[key]] = val
+                tfidf_values[i] = tf_arr
+
+        return tfidf_values
+
+    def fit_transform(self, documents):
+        # Fit and transform in one step
+        self.fit(documents)
+        return self.transform(documents)
+
+    def calculate_term_frequency(self, document):
+        term_frequency = {}
+        total_terms = len(document)
+
+        for term in document:
+            term_frequency[term] = term_frequency.get(term, 0) + 1 / total_terms
+
+        return term_frequency
+
+    def calculate_inverse_document_frequency(self, documents):
+        document_count = len(documents)
+        term_document_count = Counter()
+
+        for document in documents:
+            for sent in document:
+                unique_terms = set(sent)
+                term_document_count.update(unique_terms)
+
+        inverse_document_frequency = {}
+
+        for term, count in term_document_count.items():
+            inverse_document_frequency[term] = math.log(document_count / (count + 1))
+
+        return inverse_document_frequency
