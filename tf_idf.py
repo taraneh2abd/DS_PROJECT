@@ -8,12 +8,12 @@ class TFIDFVectorizer:
         self.word_map = word_map
 
     def fit(self, documents):
-        # Compute inverse document frequency and vocabulary
+        
         self.inverse_document_frequency = self.calculate_inverse_document_frequency(documents)
         self.vocab = set(self.inverse_document_frequency.keys())
 
     def transform(self, documents, data_type):
-        # Transform documents using the precomputed IDF values
+       
         tfidf_values = {}
         if data_type == 'documents':
 
@@ -41,7 +41,7 @@ class TFIDFVectorizer:
         return tfidf_values
 
     def fit_transform(self, documents, data_type):
-        # Fit and transform in one step
+       
         self.fit(documents)
         return self.transform(documents, data_type)
 

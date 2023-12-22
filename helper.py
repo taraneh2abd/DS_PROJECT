@@ -1,13 +1,23 @@
-from cosine_similarity import cosine_similarity
+import math
 from termcolor import colored
 from tqdm import tqdm
 from dataset_generator import DatasetGenerator
+
+def cosine_similarity(v1,v2):
+    "compute cosine similarity of v1 to v2: (v1 dot v2)/{||v1||*||v2||)"
+
+    dot_product = sum(v1.get(term, 0) * v2.get(term, 0) for term in set(v1) & set(v2))
+    magnitude1 = math.sqrt(sum(value**2 for value in v1.values()))
+    magnitude2 = math.sqrt(sum(value**2 for value in v2.values()))
+
+    if magnitude1 == 0 or magnitude2 == 0:
+        return 0
+
+    return dot_product / (magnitude1 * magnitude2)
+
 def search(qcase, candidates, df,unique_tokens, word_map ):
     res={}
 
-    # data['tf-idf'] = tf_idf(tokens, word_map, data)
-    # print(tokens)
-    # print(sent)
     print(colored("!!!Calculating tf_idf of query!!!", "red"))
     dataset_gerator = DatasetGenerator()
     qcase['sentence'] = dataset_gerator.similar_tokens(qcase, unique_tokens)
@@ -20,17 +30,7 @@ def search(qcase, candidates, df,unique_tokens, word_map ):
     ans = next(iter(res)) 
     target = []
     max_val = res[ans]
-    # for i ,v in enumerate(df[ans]['sentences']):
-    #     print(f"sent {i}", v)
 
-    # tf_arr = []
-    # tf_arr.append(tokens)
-  
-    # for i in df[ans]['sentences']:
-    #     tf_arr.append(i)
-
-    # tf_arr = calculate_tfidf2(tf_arr, word_map)
-    # data['tf-idf'] =  tf_arr[0]
     for v in tqdm(df[ans]['vectors']):
         target.append(cosine_similarity(qcase['tf_idf'],v))
     

@@ -17,7 +17,7 @@ class WordTokenizer:
         
 
     def remove_punctuation(self, text):
-        text = re.sub(r'\d+', '', text)
+        # text = re.sub(r'\d+', '', text)
         cleaned_text = re.sub(r'[^\w\s]', '', text)
         return cleaned_text
 
@@ -36,7 +36,7 @@ class WordTokenizer:
     
     def remove_stopwords(self, tokens):
 
-        return list(token for token in tokens if token not in self.stopwords and len(token) > 2)
+        return list(token for token in tokens if token not in self.stopwords and len(token) > 1)
     
     def lemmatizer(self, tokens):
         

@@ -17,7 +17,7 @@ class DatasetGenerator:
         self.CONTENT_DIR = Path(content_dir)
         self.QUERY_FILE = Path(query_file)
         self.CLEAN_QUERY = Path(clean_query)
-        
+        self.word_map = {}
 
     def sum_dicts(self, dicts):
         result_dict = {}
@@ -57,7 +57,7 @@ class DatasetGenerator:
         unique_tokens = set()
         index = 0
         tokenizer =  WordTokenizer()
-        word_map = {}
+
         if not Path(self.DS_PATH / self.CLEAN_DS_FILE).is_file():
             
             while Path(CONTENT_DIR /CONTENT_FILE_PATTERN.format(index = index)).is_file():
@@ -77,8 +77,8 @@ class DatasetGenerator:
                 index += 1
 
             for i, word in enumerate(unique_tokens):
-                word_map[word] = i
-            self.tfidf_vectorizer =  TFIDFVectorizer(word_map)
+                self.word_map[word] = i
+            self.tfidf_vectorizer =  TFIDFVectorizer(self.word_map)
             for item in data_list:
                 for key, value in item.items():
                     if isinstance(value, set):
@@ -101,7 +101,7 @@ class DatasetGenerator:
             message1 = self.save_json(query, "query")
             print(colored(message1, "yellow"))
 
-            return data, query, unique_tokens, word_map
+            return data, query, unique_tokens
         else:
             data, message = self.load_json(Path(self.DS_PATH / self.CLEAN_DS_FILE), "dataset.json")
 
@@ -109,15 +109,14 @@ class DatasetGenerator:
                 unique_tokens |= set(document['unique_Tokens'])
             self.unique_tokens= unique_tokens
             for i, word in enumerate(unique_tokens):
-                word_map[word] = i
-            self.tfidf_vectorizer =  TFIDFVectorizer(word_map)
+                self.word_map[word] = i
+            self.tfidf_vectorizer =  TFIDFVectorizer(self.word_map)
 
             print(colored(message, "blue"))
 
             query_data, message1 = self.load_json(Path(self.DS_PATH/self.CLEAN_QUERY), "clean_query.json")
 
-            return data, query_data, unique_tokens, word_map
-
+            return data, query_data, unique_tokens
         
     
     def calculate_tfidf(self, data):
@@ -133,9 +132,9 @@ class DatasetGenerator:
         return data
             
 
-    def calculate_tfidf2(self, query_data, df,word_map):
+    def calculate_tfidf2(self, query_data, df):
 
-        self.tfidf_vectorizer =  TFIDFVectorizer(word_map)
+        self.tfidf_vectorizer =  TFIDFVectorizer(self.word_map)
         self.tfidf_vectorizer.fit(df)
         query_data['tf_idf'] = self.tfidf_vectorizer.transform(query_data, 'query')
         
@@ -149,11 +148,9 @@ class DatasetGenerator:
             max_val = 0
             seq = SequenceMatcher()
             words = get_close_matches(token, unique_tokens)
-            # print(token, words)
             for word in words:
                 seq.set_seqs(token, word)
                 similarity_ratio = seq.ratio()*100
-                # print(word, similarity_ratio)
                 if similarity_ratio > max_val:
                     target = word
                     max_val = similarity_ratio
@@ -161,28 +158,5 @@ class DatasetGenerator:
                 similar_tokens.append(target)
 
         return similar_tokens
-
-    # def similar_tokens(self, query, self., threshold=0.8):
-    #     result = {}
-
-    #     for case in tqdm(query):
-    #         case_id = case['case_id']
-    #         tokens = case['sentence']
-
-    #         similar_tokens = []
-    #         for token in tokens:
-    #             words = get_close_matches(token, unique_tokens, n=5, cutoff=threshold)
-    #             if not words:
-    #                 continue
-
-    #             ratios = np.array([SequenceMatcher(None, token, word).ratio() for word in words])
-    #             max_index = np.argmax(ratios)
-
-    #             if ratios[max_index] > threshold:
-    #                 similar_tokens.append(words[max_index])
-
-    #         result[case_id] = similar_tokens
-
-    #     return result
 
 
