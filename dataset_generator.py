@@ -73,7 +73,8 @@ class DatasetGenerator:
                 
                 unique_tokens |= tokens
 
-                data_list.append({'document_id': index, 'unique_Tokens': tokens,'sentences': sentences,'vectors': None,'tf_idf': None})
+                data_list.append({'document_id': index, 'unique_Tokens': tokens,'sentences': sentences,
+                                  'vectors': None,'tf_idf': None, 'most_frequent' : None, 'top_five' : None})
                 index += 1
 
             for i, word in enumerate(unique_tokens):
@@ -120,23 +121,34 @@ class DatasetGenerator:
         
     
     def calculate_tfidf(self, data):
-        tfidf_results = self.tfidf_vectorizer.fit_transform(data, 'documents')
-        
+        tfidf_results , tf_results= self.tfidf_vectorizer.fit_transform(data, 'documents')
+    
         for key, value in tqdm(tfidf_results.items()):
             data[key]['vectors'] = value
             sum_vec = {}
             for sentence in value:
                 sum_vec = self.sum_dicts([sum_vec, sentence])
             data[key]['tf_idf'] = sum_vec
+            sorted_tfidf = dict(sorted(sum_vec.items(), key=lambda item: item[1], reverse=True))
+            tfidf_list = list(sorted_tfidf)
+            word_list = list(self.word_map)
+            data[key]['top_five'] = [word_list[k] for k in tfidf_list[:5]]
+        
+        for key, value in tqdm(tf_results.items()):
+            sum_vec = {}
+            for sentence in value:
+                sum_vec = self.sum_dicts([sum_vec, sentence])
+            sorted_tf = dict(sorted(sum_vec.items(), key=lambda item: item[1], reverse=True))
+            data[key]['most_frequent'] = list(sorted_tf.keys())
+        
+
         
         return data
             
 
-    def calculate_tfidf2(self, query_data, df):
+    def calculate_tfidf2(self, query_data,tfidf_vectorizer ):
 
-        self.tfidf_vectorizer =  TFIDFVectorizer(self.word_map)
-        self.tfidf_vectorizer.fit(df)
-        query_data['tf_idf'] = self.tfidf_vectorizer.transform(query_data, 'query')
+        query_data['tf_idf'] = tfidf_vectorizer.transform(query_data, 'query')
         
         return  query_data
     

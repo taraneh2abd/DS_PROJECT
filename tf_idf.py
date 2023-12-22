@@ -13,21 +13,24 @@ class TFIDFVectorizer:
         self.vocab = set(self.inverse_document_frequency.keys())
 
     def transform(self, documents, data_type):
-       
-        tfidf_values = {}
-        if data_type == 'documents':
 
+        if data_type == 'documents':
+            tf_values = {}
+            tfidf_values = {}
             for document in documents:
                 doc_tfidf = []
-                for sentence in document['sentences']:
-                    tf_arr = {}
+                doc_tf = {}
+                for i, sentence in enumerate(document['sentences']):
+                    sent_tfidf = {}
                     term_frequency = self.calculate_term_frequency(sentence)
+                    doc_tf[i] = term_frequency
                     tfidf_sentence = {term: tf * self.inverse_document_frequency[term] for term, tf in term_frequency.items()}
                     for key, val in tfidf_sentence.items():
-                        tf_arr[self.word_map[key]] = val
-                    doc_tfidf.append(tf_arr)
+                        sent_tfidf[self.word_map[key]] = val
+                    doc_tfidf.append(sent_tfidf)
                 tfidf_values[document["document_id"]] = doc_tfidf
-        
+                tf_values[document["document_id"]] = doc_tf
+            return tfidf_values, tf_values
         else:
 
            
@@ -38,7 +41,6 @@ class TFIDFVectorizer:
                 tf_arr[self.word_map[key]] = val
             return tf_arr
 
-        return tfidf_values
 
     def fit_transform(self, documents, data_type):
        

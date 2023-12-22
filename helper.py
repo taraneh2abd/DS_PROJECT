@@ -15,13 +15,13 @@ def cosine_similarity(v1,v2):
 
     return dot_product / (magnitude1 * magnitude2)
 
-def search(qcase, candidates, df,unique_tokens, word_map ):
+def search(qcase, candidates, df,unique_tokens, tfidf_vectorizer ):
     res={}
 
     print(colored("!!!Calculating tf_idf of query!!!", "red"))
     dataset_gerator = DatasetGenerator()
     qcase['sentence'] = dataset_gerator.similar_tokens(qcase, unique_tokens)
-    qcase = dataset_gerator.calculate_tfidf2(qcase, df, word_map)
+    qcase = dataset_gerator.calculate_tfidf2(qcase,tfidf_vectorizer)
 
     for i, candidate in enumerate(candidates):
         res[candidate] = cosine_similarity(qcase['tf_idf'],df[candidate]['tf_idf'])
