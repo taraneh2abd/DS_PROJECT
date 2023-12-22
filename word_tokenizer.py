@@ -17,7 +17,7 @@ class WordTokenizer:
         
 
     def remove_punctuation(self, text):
-        # text = re.sub(r'\d+', '', text)
+        text = re.sub(r'\d+', '', text)
         cleaned_text = re.sub(r'[^\w\s]', '', text)
         return cleaned_text
 
