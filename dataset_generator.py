@@ -1,3 +1,5 @@
+#class of DatasetGenerator
+
 import json
 from pathlib import Path
 from termcolor import colored
