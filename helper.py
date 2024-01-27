@@ -33,7 +33,7 @@ def search(qcase, candidates, df,unique_tokens, dataset_generator ):
     target = []
     max_val = res[ans]
   
-    for v in tqdm(df[0]['vectors']):
+    for v in tqdm(df[ans]['vectors']):
         target.append(cosine_similarity(qcase['tf_idf'],v))
     
 
